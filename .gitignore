@@ -1,8 +1,0 @@
-/target/
-*.iml
-.settings/
-.classpath
-.project
-.idea/
-
-jupyter_notebooks/.ipynb_checkpoints/
