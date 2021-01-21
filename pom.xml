@@ -12,7 +12,7 @@
     </parent>
 
     <groupId>superresolusian</groupId>
-    <artifactId>sian_utils_</artifactId>
+    <artifactId>sian_utils</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 
 
