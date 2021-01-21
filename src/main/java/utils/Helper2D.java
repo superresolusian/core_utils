@@ -1,5 +1,6 @@
 package utils;
 
+import ij.IJ;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
