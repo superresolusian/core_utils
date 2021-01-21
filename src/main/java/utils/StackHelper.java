@@ -19,7 +19,7 @@ import java.util.Arrays;
 
 import static ij.process.ImageProcessor.NO_LUT_UPDATE;
 import static java.lang.Math.*;
-import static ArrayUtils.toDoubleArray;
+
 
 /**
  * Created by sculley on 14/01/2020.
