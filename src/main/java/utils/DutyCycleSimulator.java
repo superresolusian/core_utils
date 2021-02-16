@@ -99,6 +99,9 @@ public class DutyCycleSimulator {
     }
 
     public static double getBleachTime(double exptTime, double survivalFraction){
+
+        if(survivalFraction==1) return exptTime*2;
+
         ExponentialDistribution bleachDistribution = new ExponentialDistribution((-400*1000)/(log(survivalFraction)));
         double bleachTime = min(exptTime, bleachDistribution.sample());
 
