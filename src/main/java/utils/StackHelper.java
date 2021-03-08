@@ -6,6 +6,7 @@ import ij.ImageStack;
 import ij.gui.Roi;
 import ij.plugin.LutLoader;
 import ij.plugin.filter.Binary;
+import ij.process.FloatBlitter;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.process.LUT;
@@ -441,6 +442,53 @@ public class StackHelper {
             if(pixels[p]==0) pixels[p] = Double.MAX_VALUE;
         }
         return StatUtils.min(pixels);
+    }
+
+    public static ArrayList<int[]> getParticles(FloatProcessor fp, boolean doNMolecules){
+        int w = fp.getWidth();
+        int h = fp.getHeight();
+
+        ArrayList<Integer> xLocs = new ArrayList<Integer>();
+        ArrayList<Integer> yLocs = new ArrayList<Integer>();
+
+        for(int y=0; y<h; y++){
+            for(int x=0; x<w; x++){
+                float v = fp.getf(x, y);
+                if(v==0) continue;
+                if(doNMolecules){
+                    for(int n=0; n<v; n++){
+                        xLocs.add(x);
+                        yLocs.add(y);
+                    }
+                }
+                else{
+                    xLocs.add(x);
+                    yLocs.add(y);
+                }
+            }
+        }
+
+        int nParticles = xLocs.size();
+        int[] xLocs_ = new int[nParticles];
+        int[] yLocs_ = new int[nParticles];
+
+        for(int i=0; i<nParticles; i++){
+            xLocs_[i] = xLocs.get(i);
+            yLocs_[i] = yLocs.get(i);
+        }
+
+        ArrayList<int[]> output = new ArrayList<int[]>();
+        output.add(xLocs_);
+        output.add(yLocs_);
+        return output;
+    }
+
+    public static FloatProcessor padEdges(FloatProcessor fp, int padSize){
+        int w = fp.getWidth();
+        int h = fp.getHeight();
+        FloatProcessor fpPadded = new FloatProcessor(w+2*padSize, h+2*padSize);
+        fpPadded.copyBits(fp, padSize-1, padSize-1, FloatBlitter.COPY);
+        return fpPadded;
     }
 
 }

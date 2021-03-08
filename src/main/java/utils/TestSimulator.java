@@ -39,19 +39,20 @@ public class TestSimulator {
         double photons = fluorophore.nPhotons;
         double wavelength = fluorophore.wavelength;
 
-        int w = 501;
-        int h = 501;
-        int xc = 250;
-        int yc = 250;
-        int rad = 50;
-        int nParticles = 10000;
+        int w = 301;
+        int h = 301;
+        int xc = 150;
+        int yc = 150;
+        int rad = 10;
+        int nParticles = 10;
 
-        double exptTime = 10*1000;
-        double frameDuration = 10;
+        double exptTime = 60*1000;
+        double frameDuration = 17;
         int nFrames = (int) (exptTime/frameDuration);
 
         double bleachTime = getBleachTime(exptTime, survivalFraction);
-        int nSwitchingCycles = getNSwitchingCycles(meanSwitchingCycles);
+        int nSwitchingCycles = getNSwitchingCycles(meanSwitchingCycles, exptTime, bleachTime);
+        System.out.println("meanSwitchingCycles = "+meanSwitchingCycles+", nSwitchingCycles = "+nSwitchingCycles);
 
         long start = System.currentTimeMillis();
         ArrayList<float[]> photonTraces = new ArrayList<>();
@@ -64,8 +65,8 @@ public class TestSimulator {
         long stop = System.currentTimeMillis();
 
         System.out.println("time to make "+nParticles+" traces = "+(stop-start)+"ms");
-        int targetW = 50;
-        int targetH = 50;
+        int targetW = 30;
+        int targetH = 30;
         ImageStack imsAnalogToDigital = new ImageStack(targetW, targetH, nFrames);
 
         double pixelSize = 10;
@@ -79,7 +80,7 @@ public class TestSimulator {
 
         for(int f=0; f<nFrames; f++){
             FloatProcessor fp = particlesToFrame(w, h, f, xPos, yPos, photonTraces);
-            fp.add(photons*0.001);
+            fp.add(photons*0.0001);
             fp = gaussianBlur(fp, sigma);
             fp = photonsPerDetectorElement(fp, targetW, targetH, BIN);
             fp = photoelectronEmission(fp);

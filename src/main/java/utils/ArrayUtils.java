@@ -113,4 +113,18 @@ public class ArrayUtils {
         });
         return Arrays.asList(indices);
     }
+
+    public static double[] purgeBelowValue(double[] vals, double minVal){
+        ArrayList<Double> list = new ArrayList<>();
+        for(int i=0; i<vals.length; i++){
+            double val = vals[i];
+            if(val>minVal) list.add(val);
+        }
+        return toDoubleArray(list);
+    }
+
+    public static double[] arraySubtract(double[] vals, double sub){
+        for(int i=0; i<vals.length; i++) vals[i] -= sub;
+        return vals;
+    }
 }

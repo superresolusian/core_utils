@@ -25,6 +25,22 @@ public class CameraStatisticsSimulator {
     public static final double defaultGain = 100;
     public static final double defaultSensitivity = 12.6;
     public static final double defaultBase = 100;
+    public static final double defaultBackgroundFraction = 0.0001;
+
+    public static FloatProcessor fullProcessWithDefaults(int w, int h, int frame, int targetW, int targetH,
+                                                         int[] xPos, int[] yPos, ArrayList<float[]> switchingLists,
+                                                         double photons, double sigma){
+        FloatProcessor fp = particlesToFrame(w, h, frame, xPos, yPos, switchingLists);
+        fp = addArbitraryBackground(fp, photons, defaultBackgroundFraction);
+        fp = gaussianBlur(fp, sigma);
+        fp = photonsPerDetectorElement(fp, targetW, targetH, BIN);
+        fp = quantumEfficiencyAndClockCharge(fp, defaultQE, defaultClock);
+        fp = photoelectronEmission(fp);
+        fp = applyGain(fp, defaultGain, USEGAMMA);
+        fp = addReadNoise(fp, defaultReadNoise);
+        fp = analogToDigitalConversion(fp, defaultSensitivity, defaultBase);
+        return fp;
+    }
 
 
 
@@ -38,6 +54,11 @@ public class CameraStatisticsSimulator {
             float v = switchingLists.get(n)[frame];
             fp.setf(x, y, v);
         }
+        return fp;
+    }
+
+    public static FloatProcessor addArbitraryBackground(FloatProcessor fp, double photons, double backgroundFraction){
+        fp.add(photons*backgroundFraction);
         return fp;
     }
 
