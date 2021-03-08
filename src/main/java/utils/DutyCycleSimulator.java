@@ -24,7 +24,7 @@ public class DutyCycleSimulator {
         double totalOnTime = bleachTime * dutyCycle;
         double blinkOnTime = totalOnTime / nSwitchingCycles;
 
-        System.out.println("total on = "+totalOnTime+ ", blink on = "+blinkOnTime);
+        //System.out.println("total on = "+totalOnTime+ ", blink on = "+blinkOnTime);
 
         // get blink starts
         double[] blinkStarts = new double[nSwitchingCycles];
@@ -80,12 +80,12 @@ public class DutyCycleSimulator {
                 t += -thisState;
             } else {
                 double timeRemainingInBlink = thisState;
-                while (timeRemainingInBlink > 0) {
+                while (timeRemainingInBlink > 0 && f < nFrames) {
                     double timeInThisFrame = (f + 1) * frameDuration - t;
                     timeInThisFrame = min(timeRemainingInBlink, timeInThisFrame);
                     int nPhotonsInFrame = (int) (nPhotons * timeInThisFrame / thisState);
                     photonTrace[f] = nPhotonsInFrame;
-                    System.out.println(nPhotonsInFrame + " photons in frame " + f);
+                    //System.out.println(nPhotonsInFrame + " photons in frame " + f);
                     t += timeInThisFrame;
                     timeRemainingInBlink -= timeInThisFrame;
                     f++;
@@ -108,9 +108,13 @@ public class DutyCycleSimulator {
         return bleachTime;
     }
 
-    public static int getNSwitchingCycles(double meanSwitchingCycles){
+    public static int getNSwitchingCycles(double meanSwitchingCycles, double exptLength, double bleachTime){
         Random random = new Random();
-        int nSwitchingCycles = (int) (meanSwitchingCycles + random.nextGaussian()*(meanSwitchingCycles/10));
+        double meanSwitchingCycles_ = meanSwitchingCycles/(400*1000) * exptLength; // in original paper n cycles is within 2000s, but here take same time window as for survival
+        int nSwitchingCycles = (int) (meanSwitchingCycles_ + random.nextGaussian()*(meanSwitchingCycles_/10));
+
+        // account for bleaching
+        if(bleachTime<exptLength && nSwitchingCycles>0) nSwitchingCycles = max(1, (int) (nSwitchingCycles*(bleachTime/exptLength))); //needs to be at least 1 as bleaching can only occur from on state;
         return max(nSwitchingCycles, 0);
     }
 
@@ -124,13 +128,13 @@ public class DutyCycleSimulator {
         double survivalFraction = 0.73;
         double dutyCycle = 0.0012;
         double meanSwitchingCycles = 26;
-        double exptTime = 400*1000;
+        double exptTime = 30*1000;
         double frameDuration = 10;
         int photons = 5202;
         int nFrames = (int) (exptTime/frameDuration);
 
         double bleachTime = getBleachTime(exptTime, survivalFraction);
-        int nSwitchingCycles = getNSwitchingCycles(meanSwitchingCycles);
+        int nSwitchingCycles = getNSwitchingCycles(meanSwitchingCycles, exptTime, bleachTime);
 
 
         ArrayList<Double> testList = getStateList(exptTime, bleachTime, dutyCycle, nSwitchingCycles);
