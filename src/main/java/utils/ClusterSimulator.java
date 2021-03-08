@@ -16,7 +16,7 @@ public class ClusterSimulator {
 
     private static final double ROOT2 = sqrt(2);
 
-    static ArrayList<Point> createTriangleLattice(int w, double vertexLength){
+    public static ArrayList<Point> createTriangleLattice(int w, double vertexLength){
         double x0 = vertexLength/2;
         double y0 = vertexLength/2;
 
@@ -41,7 +41,7 @@ public class ClusterSimulator {
         return vertexPoints;
     }
 
-    static ArrayList<Point> jitterLattice(ArrayList<Point> lattice, double jitterRadius){
+    public static ArrayList<Point> jitterLattice(ArrayList<Point> lattice, double jitterRadius){
         ArrayList<Point> jitteredLattice = new ArrayList<>();
         Random random = new Random();
         for(Point p:lattice){
@@ -52,7 +52,7 @@ public class ClusterSimulator {
         return jitteredLattice;
     }
 
-    static FloatProcessor clusterAroundPoints(int w, ArrayList<Point> lattice, int nMolecules, double clusterRadius){
+    public static FloatProcessor clusterAroundPoints(int w, ArrayList<Point> lattice, int nMolecules, double clusterRadius){
         FloatProcessor fp = new FloatProcessor(w, w);
         Random random = new Random();
         for(Point p:lattice){
@@ -76,6 +76,7 @@ public class ClusterSimulator {
         ArrayList<Point> lattice = createTriangleLattice(500, 30);
         ArrayList<Point> jitteredLattice = jitterLattice(lattice, 3);
         FloatProcessor fp = clusterAroundPoints(500, jitteredLattice, 25, 2);
+
 
         new ImagePlus("clusters", fp).show();
 
