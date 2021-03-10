@@ -6,18 +6,44 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.FloatProcessor;
 
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Set;
+import java.util.*;
 
 import static java.lang.Double.isNaN;
 import static java.lang.Math.ceil;
+import static java.lang.Math.floor;
+import static utils.ArrayUtils.toDoubleArray;
 import static utils.ArrayUtils.toIntegerArray;
 
-public class VariableGaussianBlur {
+public class UniqueValueSplitter {
 
-    public static FloatProcessor run(FloatProcessor fp, double[] blurVals){
+    public static ImageStack splitByValues(FloatProcessor fp, double[] values){
+        int w = fp.getWidth();
+        int h = fp.getHeight();
+
+        LinkedHashMap<Double, int[]> valueMap = mapPixelsToUniqueValues(values);
+        Set<Double> keys = valueMap.keySet();
+        List<Double> sortedKeys = new ArrayList<>(keys);
+        Collections.sort(sortedKeys);
+
+        int nKeys = keys.size();
+
+        ImageStack imsSplit = new ImageStack(w, h);
+        int i=0;
+        for(Double key:sortedKeys){
+            IJ.showStatus("Splitting image...");
+            IJ.showProgress(i+1, nKeys);
+//            if(key==0){i++; continue;}
+            int[] pixels = valueMap.get(key);
+            FloatProcessor fpSplit = new FloatProcessor(w, h);
+            for(int p:pixels) fpSplit.setf(p, fp.getf(p));
+            imsSplit.addSlice(fpSplit);
+            i++;
+        }
+        return imsSplit;
+
+    }
+
+    public static FloatProcessor splitAndBlur(FloatProcessor fp, double[] blurVals){
 
         int w = fp.getWidth();
         int h = fp.getHeight();
@@ -70,19 +96,26 @@ public class VariableGaussianBlur {
     }
 
     public static void main(String[] args){
-        int w = 100, h = 100;
-        double[] blurVals = new double[w*h];
-        for(int i=0; i<w*h; i++) blurVals[i] = ceil(i/10)/100;
+        int w = 100;
+        int h = 100;
+        FloatProcessor map = new FloatProcessor(w, h);
+        for(int i=0; i<100; i++){
+            for(int j=0; j<100; j++){
+                map.setf(i, j, (float) ceil(i/25));
+            }
+        }
+        double[] blurVals = toDoubleArray(map);
         FloatProcessor fp = new FloatProcessor(w, h);
-        for(int i=0; i<w; i++){
-            fp.setf(i, i, 1.0f);
-            fp.setf(w-i-1, w-i-1, 1.0f);
+        for(int i=0; i<10; i++){
+            fp.setValue(i+1);
+            fp.drawLine((i+1)*10, 0, (i+1)*10, 100);
         }
 
         new ImageJ();
         new ImagePlus("im", fp).show();
 
-        FloatProcessor fpBlur = run(fp, blurVals);
+        new ImagePlus("split", splitByValues(fp, blurVals)).show();
+        FloatProcessor fpBlur = splitAndBlur(fp, blurVals);
         new ImagePlus("blurred", fpBlur).show();
 
     }
