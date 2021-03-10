@@ -116,7 +116,9 @@ public class Fluorophore {
         fluorophoreDictionary.put("dummyLowBlinks",         new double[]{600, 1000, 0.0001, 1.0,  2, 1.0});
         fluorophoreDictionary.put("dummyVariableBlinks",    new double[]{600, 1000, 0.0001, 0.1, 10, 1.0});
         fluorophoreDictionary.put("dummyDimBlinks",         new double[]{600,  100, 0.0001, 1.0, 10, 1.0});
-        fluorophoreDictionary.put("dummyOverlapBlinks",     new double[]{600,10000, 0.0050, 1.0, 10, 1.0});
+        fluorophoreDictionary.put("dummyOverlapBlinks1",    new double[]{600,10000, 0.0050, 1.0, 10, 1.0});
+        fluorophoreDictionary.put("dummyOverlapBlinks2",    new double[]{600,10000, 0.0100, 1.0, 10, 1.0});
+        fluorophoreDictionary.put("dummyOverlapBlinks3",    new double[]{600,10000, 0.0150, 1.0, 10, 1.0});
     }
 
     public Fluorophore(){
