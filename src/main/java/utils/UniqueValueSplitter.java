@@ -5,6 +5,9 @@ import ij.ImageJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.FloatProcessor;
+import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
+import net.haesleinhuepf.clij2.CLIJ2;
+import net.haesleinhuepf.clij2.plugins.GaussianBlur2D;
 
 import java.util.*;
 
@@ -68,6 +71,37 @@ public class UniqueValueSplitter {
 
     }
 
+    public static FloatProcessor splitAndBlurClij(FloatProcessor fp, double[] blurVals){
+        int w = fp.getWidth();
+        int h = fp.getHeight();
+
+        LinkedHashMap<Double, int[]> valueMap = mapPixelsToUniqueValues(blurVals);
+        Set<Double> keys = valueMap.keySet();
+
+        FloatProcessor fpVariableBlur = new FloatProcessor(w, h);
+
+        CLIJ2 clij2 = CLIJ2.getInstance();
+        ClearCLBuffer input = clij2.push(new ImagePlus("", fp));
+        ClearCLBuffer output = clij2.create(input);
+
+        int nKeys = valueMap.size();
+        int i=0;
+        for(Double key:keys){
+            IJ.showStatus("Performing convolution...");
+            IJ.showProgress(i+1, nKeys);
+            int[] pixels = valueMap.get(key);
+            clij2.gaussianBlur2D(input, output, key, key);
+            FloatProcessor fp_ = clij2.pull(output).getProcessor().convertToFloatProcessor();
+            for(int p:pixels) fpVariableBlur.setf(p, fp_.getf(p));
+            i++;
+        }
+
+        input.close();
+        output.close();
+
+        return fpVariableBlur;
+    }
+
     public static LinkedHashMap mapPixelsToUniqueValues(double[] values){
         double[] values_ = values.clone();
         int nValues = values.length;
@@ -118,6 +152,37 @@ public class UniqueValueSplitter {
         FloatProcessor fpBlur = splitAndBlur(fp, blurVals);
         new ImagePlus("blurred", fpBlur).show();
 
+        FloatProcessor fpBlurClij = splitAndBlurClij(fp, blurVals);
+        new ImagePlus("blurred clij", fpBlurClij).show();
+
+//        int w = 100, h = 100;
+//        FloatProcessor fp = new FloatProcessor(w, h);
+//
+//        for(int i=0; i<10; i++){
+//            fp.setValue(i+1);
+//            fp.drawLine((i+1)*10, 0, (i+1)*10, 100);
+//        }
+//
+//        CLIJ2 clij2 = CLIJ2.getInstance();
+//        ClearCLBuffer input = clij2.push(new ImagePlus("", fp));
+//        ClearCLBuffer output = clij2.create(input);
+//
+//        new ImageJ();
+//        new ImagePlus("raw", fp).show();
+//        for(int i=0; i<10; i++){
+//            FloatProcessor fp_ = fp.duplicate().convertToFloatProcessor();
+//            fp_.blurGaussian(i+1);
+//            new ImagePlus("internal ij blur "+(i+1), fp_).show();
+//        }
+//
+//        for(int i=0; i<10; i++){
+//            clij2.gaussianBlur2D(input, output, i+1, i+1);
+//            ImagePlus impClij = clij2.pull(output);
+//            impClij.setTitle("clij blur "+(i+1));
+//            impClij.show();
+//        }
+//        input.close();
+//        output.close();
     }
 
 }
