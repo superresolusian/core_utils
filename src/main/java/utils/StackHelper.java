@@ -230,6 +230,19 @@ public class StackHelper {
         return true;
     }
 
+    public static boolean checkNumberPixelsAboveBackground(FloatProcessor fp, double sigma){
+        double bg = getFpMin(fp);
+        int nPixelsThreshold = (int) (Math.PI*sigma*sigma);
+        int p=0;
+        int signalPixelCount = 0;
+        while(p<fp.getPixelCount()){
+            if(fp.getf(p)>bg) signalPixelCount++;
+            if(signalPixelCount>nPixelsThreshold) return true;
+            p++;
+        }
+        return false;
+    }
+
     public static boolean checkProportionPixelsNonZero(FloatProcessor fp, double proportion){
 
         int nPixels = fp.getPixelCount();
