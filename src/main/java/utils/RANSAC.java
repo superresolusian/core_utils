@@ -33,6 +33,8 @@ public class RANSAC {
     public double[] bestModel = null, vanillaModel, weightedModel;
     public double bestError = Double.MAX_VALUE;
 
+    public boolean fitFlag = true;
+
     Random random = new Random();
 
     public RANSAC(double[] x, double[] y){
@@ -155,6 +157,7 @@ public class RANSAC {
         //doNonRANSACFits();
         if(bestModel==null){
             IJ.log("RANSAC failed - reverting to weighted linear regression");
+            fitFlag = false;
             CurveFitter cf = new CurveFitter(x, y);
             cf.doFit(CurveFitter.STRAIGHT_LINE);
             bestModel = cf.getParams();
