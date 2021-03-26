@@ -20,6 +20,9 @@ import java.util.Arrays;
 
 import static ij.process.ImageProcessor.NO_LUT_UPDATE;
 import static java.lang.Math.*;
+import static org.apache.commons.math3.stat.StatUtils.percentile;
+import static utils.ArrayUtils.doubleArrayToFloatArray;
+import static utils.ArrayUtils.toDoubleArray;
 
 
 /**
@@ -409,7 +412,7 @@ public class StackHelper {
             if(Float.isInfinite(val)|| Float.isNaN(val)) continue;
             pixelsDNoNans.add((double) pixelsF[i]);
         }
-        return ArrayUtils.toDoubleArray(pixelsDNoNans);
+        return toDoubleArray(pixelsDNoNans);
     }
 
     public static FloatProcessor subtractFp(FloatProcessor fp1, FloatProcessor fp2){
@@ -502,6 +505,29 @@ public class StackHelper {
         FloatProcessor fpPadded = new FloatProcessor(w+2*padSize, h+2*padSize);
         fpPadded.copyBits(fp, padSize-1, padSize-1, FloatBlitter.COPY);
         return fpPadded;
+    }
+
+    public static FloatProcessor normalizeTo01Interval(FloatProcessor fp, double p1, double p2){
+        double[] values = toDoubleArray(fp);
+        double minVal, maxVal;
+
+        if(p1>0)    minVal = percentile(values, p1);
+        else        minVal = StatUtils.min(values);
+
+        if(p2<100)  maxVal = percentile(values, p2);
+        else        maxVal = StatUtils.max(values);
+
+        if(p1>0 || p2<100){
+            for(int i=0; i<values.length; i++){
+                values[i] = max(values[i], minVal);
+                values[i] = min(values[i], maxVal);
+            }
+        }
+
+        for(int i=0; i<values.length; i++) values[i] = (values[i]-minVal)/(maxVal-minVal);
+
+        return new FloatProcessor(fp.getWidth(), fp.getHeight(), doubleArrayToFloatArray(values));
+
     }
 
 }
